@@ -106,14 +106,18 @@ function verifyCsrf($token) {
     return isset($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token);
 }
 
-// Simple math CAPTCHA
+// CAPTCHA — simple checkbox + honeypot (replaces broken math captcha)
+// Honeypot: a hidden field bots fill in but humans leave empty
+// Checkbox: human must tick "I am not a robot"
 function generateCaptcha() {
-    $a = rand(1, 9);
-    $b = rand(1, 9);
-    $_SESSION['captcha_answer'] = $a + $b;
-    return "$a + $b";
+    return ''; // nothing to generate anymore
 }
 
 function verifyCaptcha($answer) {
-    return isset($_SESSION['captcha_answer']) && (int)$answer === (int)$_SESSION['captcha_answer'];
+    // Check honeypot is empty (bots fill this in)
+    if (!empty($_POST['website'])) {
+        return false;
+    }
+    // Checkbox must be ticked (value = '1')
+    return $answer === '1';
 }

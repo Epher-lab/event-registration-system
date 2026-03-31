@@ -55,8 +55,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
                 $ins->execute([$_SESSION['attendee_id'], $item['event_id'], $item['id'], $item['cart_quantity'], $item['line_total'], $ref]);
                 $regId = $db->lastInsertId();
                 // Simulate payment
-                $pm = $db->prepare("INSERT INTO payments (registration_id,amount,payment_method,payment_status,transaction_ref,paid_at) VALUES (?,?,?,?,'SIM-'.RAND(100000,999999),NOW())");
-                $pm->execute([$regId, $item['line_total'], $_POST['payment_method'] ?? 'card', 'completed']);
+                $transRef = 'SIM-' . rand(100000, 999999);
+                $pm = $db->prepare("INSERT INTO payments (registration_id,amount,payment_method,payment_status,transaction_ref,paid_at) VALUES (?,?,?,?,?,NOW())");
+                $pm->execute([$regId, $item['line_total'], $_POST['payment_method'] ?? 'card', 'completed', $transRef]);
                 // Update ticket count
                 $upd = $db->prepare("UPDATE ticket_types SET quantity_sold = quantity_sold + ? WHERE id = ?");
                 $upd->execute([$item['cart_quantity'], $item['id']]);
